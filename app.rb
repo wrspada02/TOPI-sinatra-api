@@ -1,6 +1,5 @@
 require 'sinatra'
 require 'redis'
-require 'json'
 
 redis = Redis.new(host: '', port: 6379)
 
