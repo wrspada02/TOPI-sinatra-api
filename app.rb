@@ -1,7 +1,15 @@
 require 'sinatra'
 require 'redis'
+require 'json'
 
-redis = Redis.new(host: 'localhost', port: 6379)
+redis = Redis.new(
+  host: ENV.fetch('REDIS_HOST', 'localhost'),
+  port: ENV.fetch('REDIS_PORT', '6379').to_i
+)
+
+before do
+  content_type :json
+end
 
 post '/enqueue/:item' do
   item_value = params[:item]
