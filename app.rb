@@ -2,10 +2,17 @@ require 'sinatra'
 require 'redis'
 require 'json'
 
-redis = Redis.new(
-  host: ENV.fetch('REDIS_HOST', 'localhost'),
-  port: ENV.fetch('REDIS_PORT', '6379').to_i
-)
+begin
+  redis = Redis.new(
+    host: ENV.fetch('REDIS_HOST', 'localhost'),
+    port: ENV.fetch('REDIS_PORT', '6379').to_i
+  )
+
+  redis.ping
+rescue StandardError => e
+  STDERR.puts "ERROR: Redis connection failed - #{e.class}: #{e.message}"
+  exit(1)
+end
 
 before do
   content_type :json
