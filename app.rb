@@ -2,16 +2,11 @@ require 'sinatra'
 require 'redis'
 require 'json'
 
-begin
-  redis = Redis.new(
-    host: ENV.fetch('REDIS_HOST', 'localhost'),
+def redis
+  @redis ||= Redis.new(
+    host: ENV.fetch('REDIS_HOST', 'redis'),
     port: ENV.fetch('REDIS_PORT', '6379').to_i
   )
-
-  redis.ping
-rescue StandardError => e
-  STDERR.puts "ERROR: Redis connection failed - #{e.class}: #{e.message}"
-  exit(1)
 end
 
 before do
@@ -26,7 +21,15 @@ post '/enqueue/:item' do
     return { message: 'Item must be numeric' }.to_json
   end
 
-  redis.lpush('items', item_value)
-  status 200
-  { message: "Enqueued item #{item_value} to redis queue" }.to_json
+  begin
+    redis.ping
+    redis.lpush('items', item_value)
+
+    status 200
+    { message: "Enqueued item #{item_value} to redis queue" }.to_json
+
+  rescue Redis::BaseError => e
+    status 503
+    { message: "Redis unavailable: #{e.message}" }.to_json
+  end
 end
