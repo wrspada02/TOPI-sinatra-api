@@ -3,6 +3,9 @@ require 'redis'
 require 'json'
 require 'socket'
 
+set :bind, '0.0.0.0'
+set :port, ENV.fetch('PORT', 4567)
+
 def log(msg)
   puts "[API #{Socket.gethostname}] #{msg}"
 end
